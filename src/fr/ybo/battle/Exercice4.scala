@@ -1,8 +1,10 @@
 package fr.ybo.battle
 
 import java.util.concurrent.TimeUnit
+import collection.parallel.ParSeq
 
-class Pion(val x: Int, val y: Int, var poid:Long=1) {
+
+class Pion(val x: Int, val y: Int, var poid:BigInt=1) {
 
   def play(size: Int): Seq[Pion] = {
 
@@ -26,7 +28,7 @@ class Pion(val x: Int, val y: Int, var poid:Long=1) {
 
 object Exercice4 {
 
-  def calculate(size: Int): Long = {
+  def calculate(size: Int): BigInt = {
 
     var allPion = Seq(new Pion(0, 0))
 
@@ -35,25 +37,17 @@ object Exercice4 {
     var oldPourcentage = 0
     for (index <- 1 to nbCoups) {
 
-      pourcentage = (index * 100/ nbCoups)
+      pourcentage = (index * 10/ nbCoups)
       if (pourcentage != oldPourcentage) {
-        println("Avancement : " + pourcentage + "%")
+        println("Avancement : " + (pourcentage*10) + "%")
         oldPourcentage = pourcentage
       }
 
-      var newPions = Seq.empty[Pion]
-
-      allPion.flatMap(pion => pion.play(size)).foreach(pion => {
-        val oldPion = newPions.find(_.isSame(pion))
-        if (!oldPion.isDefined) {
-          newPions :+= pion
-        } else {
-          oldPion.get.poid += pion.poid
-        }
-      })
-
-      allPion = newPions
-
+      allPion = allPion.flatMap(pion => pion.play(size)).groupBy(pion => {
+        (pion.x, pion.y)
+      }).map(pions => {
+        new Pion(pions._1._1, pions._1._2, pions._2.map(_.poid).sum)
+      }).toSeq
     }
 
     allPion.map(_.poid).sum
