@@ -2,34 +2,37 @@ package fr.ybo.battle
 
 class Player(val sequence:Seq[Int]) {
   var position = 0
-  var currentPlay = 0
+  var nbCoups = 0
+  var history = Seq.empty[(Int, Int)]
 
-  def play {
-    if (currentPlay == sequence.size) {
-      currentPlay = 0
-    }
-
-    position += sequence.apply(currentPlay)
-
-    position = position match {
+  def newPosition(currentPlay:Int):Int = {
+    (position + currentPlay) match {
       case 19 => 17
       case 32 => 33
       case 51 => 48
-      case _ => position
+      case _ => position + currentPlay
     }
+  }
 
-    currentPlay += 1
+  def playToTheEnd() {
+    nbCoups = Stream.continually(sequence.toStream).flatten.takeWhile(currentPlay => {
+      position = newPosition(currentPlay)
+      history :+= (currentPlay, position)
+      position < 56
+    }).size
   }
 }
 
 object Exercice5 {
 
   def calculateBestPlayer(players:Seq[Player]) {
-    while (players.filter(_.position >= 56).isEmpty) {
-      players.foreach(_.play)
-    }
+    players.foreach(_.playToTheEnd())
     players.zipWithIndex.foreach(playerWithIndex => {
-      println("Player " + (playerWithIndex._2 +1) + ", case : " + playerWithIndex._1.position)
+      println("Player " + (playerWithIndex._2 +1) + ", case : " + playerWithIndex._1.position + ", nbCoups : " + playerWithIndex._1.nbCoups)
+      println("History : ")
+      println(playerWithIndex._1.history.map(unCoup => {
+        "Coup : " + unCoup._1 + ", position : " + unCoup._2
+      }).mkString("\n"))
     })
   }
 

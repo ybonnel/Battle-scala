@@ -1,7 +1,6 @@
 package fr.ybo.battle
 
 import java.util.concurrent.TimeUnit
-import collection.parallel.ParSeq
 
 
 class Pion(val x: Int, val y: Int, var poid:BigInt=1) {
