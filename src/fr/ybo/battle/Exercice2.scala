@@ -7,40 +7,24 @@ object Exercice2 {
 
   def defaultSep = Seq("\n", ",")
 
-  def add(valeur:String):Int = {
+  def add(valeur: String): Int = {
 
     if (valeur.isEmpty) {
       return 0
     }
 
-    var seps:Seq[String] = Seq.empty
+    val myValue = valeur.split("\n").filter(!_.startsWith("//")).mkString("\n")
 
-    var myValue = valeur
+    val seps = defaultSep.union(specificSepRegExp.findAllIn(valeur.split("\n").apply(0)).map(oneSep => {
+      oneSep.substring(1, oneSep.length - 1)
+    }).toSeq)
 
-    if (valeur.startsWith("//")) {
-      seps = defaultSep
-
-      specificSepRegExp.findAllIn(valeur.split("\n").apply(0)).map(oneSep => {
-        oneSep.substring(1, oneSep.length - 1)
-      }).foreach(seps :+= _)
-
-      myValue = valeur.split("\n").filter(!_.startsWith("//")).mkString("\n")
-    } else {
-      seps = defaultSep
-    }
-
-    var regexpSep = ""
-    seps.foreach( sep => {
-      if (regexpSep.length > 0) {
-        regexpSep += "|"
-      }
-      regexpSep = regexpSep + "(" + sep.flatMap("\\" + _) + ")"
-    })
+    val regexpSep = seps.map("(" + _.flatMap("\\" + _) + ")").mkString("|")
 
     try {
       myValue.split(regexpSep).map(_.toInt).filter(_ <= 1000).sum
     } catch {
-      case ignore:NumberFormatException => 9999
+      case ignore: NumberFormatException => 9999
     }
   }
 
